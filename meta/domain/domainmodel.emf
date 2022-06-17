@@ -1,0 +1,256 @@
+@namespace(
+	uri="http://www.helse-bergen.no/piv/data/histo-domain-model",
+	prefix="histo")
+package histopathology;
+
+datatype ID: java.lang.String;
+datatype Timestamp: java.time.LocalDateTime;
+datatype NorpatCode: java.lang.String;
+
+enum TokenType {
+	CASE;
+	ANALYSIS;
+	SPECIMEN;
+	BLOCK;
+	SLIDE;
+}
+
+enum PathologyField {
+	CYTOLOGY;
+	HISTOLOGY;
+	AUTOPSY;
+	MOLECULAR_PATHOLOGY;
+	FORENSIC_MEDICINE;
+}
+
+enum UserRole {
+	SECRETARIAN;
+	LAB_TECHNICIAN;
+	PATHOLOGIST;
+}
+
+enum PathologySpecialization {
+	GYN;
+	HUD;
+	GI;
+	H;
+	SAR;
+	MAM;
+	NEV;
+	LYM;
+	ORA;
+	URO;
+	�NH;
+	LUN;
+	�YE;
+	HJE;
+	PLA;
+	ANN;
+	XXX;
+	NYR;
+}
+
+enum InternalSpecimenSizeType {
+	BIG;
+	EXTENDED;
+	SMALL;
+}
+
+enum InternalPriorityLevel {
+	CRYO;
+	CITO;
+	PRIO;
+	REGULAR;
+}
+
+enum SpecimenState {
+	FRESH;
+	FIXATED;
+	ARCHIVED;
+	DESTROYED;
+}
+
+enum BlockState {
+	CASETTE;
+	PROCESSED;
+	EMBEDDED;
+}
+
+enum CaseState {
+	NOTIFIED;
+	IN_LAB;
+	UNDER_DIAGNOSIS;
+	CONCLUDED;
+}
+
+enum AnalysisState {
+	REQUISITIONED;
+	PRELIMINARY;
+	FINAL;
+	FINAL_AUGMENTED;
+}
+
+enum EventType {
+	EVENT;
+	ACTIVITY_START;
+	ACTIVITY_END;
+	ACTIVITY_PAUSE;
+	UNOBSERVABLE_EVENT;
+}
+
+enum BioSex {
+	MALE;
+	FEMALE;
+}
+
+enum InternalLabDivision {
+	HISTO_LAB;
+	CYTO_LAB;
+	IMMUN_LAB;
+	KIDNEY_LAB;
+	NEURO_LAB;
+	MOLECULAR_LAB;
+}
+
+class Event {
+	ref Case[1] belongsTo;
+	attr Timestamp[1] timestamp;
+	attr String[1] name;
+	attr EventType[1] eventType;
+	ref Token[?] actsUpon;
+	ref User[?] responsible;
+	attr String[*] metadata;
+	attr String[?] workstation;
+}
+
+class User {
+	attr ID[1] userID;
+	attr String[?] pseudonym;
+	attr UserRole[*] roles;
+}
+
+class Patient {
+	attr ID[1] internalId;
+	attr String[?] personalIdentificationNo;
+	attr String[?] familyName;
+	attr String[*] givenNames;
+	attr Date[?] birthdate;
+	attr BioSex[?] sex;
+}
+
+class HealthOrganizaton {
+	attr ID[1] internalId;
+	attr String[1] code;
+	attr String[*] address;
+	ref HealthOrganizaton[?] partOf;
+}
+
+class Clinician {
+	attr ID[1] internalId;
+	ref HealthOrganizaton[+] worksAt;
+}
+
+class Requisition {
+	attr ID[1] externalReference;
+	ref Clinician[1] requisitioner;
+	ref HealthOrganizaton[1] requestingOrganisation;
+	attr Timestamp[1] issuedAt;
+	attr boolean[1] isElectronic;
+	attr boolean[1] isInternal;
+	attr String[*] clinicalQuestions;
+}
+
+abstract class Token {
+	attr ID[1] internalID;
+	attr TokenType[1] tokenType;
+}
+
+class Case extends Token {
+	attr ID[1] labID;
+	attr PathologyField[1] division;
+	attr CaseState[1] state;
+	attr InternalPriorityLevel[?] priority;
+	attr PathologySpecialization[?] responsibleTeam;
+	ref Patient[1] patient;
+	ref User[?] responsiblePathologist;
+	ref User[*] supervisingPathologists;
+	val Requisition[1] requisition;
+	val Specimen[+] specimens;
+}
+
+class Specimen extends Token {
+	attr Date[1] samplingDate;
+	attr SpecimenState[1] state;
+	attr InternalSpecimenSizeType[1] size;
+	attr NorpatCode[1] locationCode;
+	attr NorpatCode[1] procedureCode;
+	attr ID[?] archiveContainer;
+	val Block[*]#specimen blocks;
+}
+
+class Block extends Token {
+	attr int[1] blockNo;
+	attr BlockState[1] state;
+	attr Timestamp[1] createdAt;
+	val Slide[*]#block slides;
+	ref Specimen[1]#blocks specimen;
+}
+
+class Slide extends Token {
+	attr int[1] slideNo;
+	ref Block[1]#slides block;
+	attr Timestamp[1] orderedAt;
+	ref User[1] orderedBy;
+	attr Timestamp[?] createdAt;
+	attr Timestamp[?] stainedAt;
+	ref StainingMethod[?] stain;
+}
+
+
+abstract class AnalysisMethod {
+	attr ID[1] internalID;
+	attr String[1] code;
+	attr String[*] description;
+	attr InternalLabDivision[1] offeredByLab;
+}
+
+class StainingMethod extends AnalysisMethod {
+	
+}
+
+class FlowAnalysisMethod extends AnalysisMethod {
+	
+}
+
+class MolecularAnalysisMethod extends AnalysisMethod {
+	
+}
+
+abstract class AnalysisResult extends Token {
+	attr AnalysisState[1] state;
+	attr String[*] comment;
+	attr Timestamp[1] orderedAt;
+	ref User[1] orderedBy;
+	attr Timestamp[?] issuedAt;
+	ref User[?] issuedBy;
+	attr Timestamp[?] lastUpdated;
+}
+
+class MicroscopicAnalysis extends AnalysisResult {
+	attr NorpatCode[*] diagnosisCoding;
+}
+
+class MacroscopicAnalysis extends AnalysisResult {
+}
+
+class MolecularAnalysis extends AnalysisResult {
+	ref MolecularAnalysisMethod[+] analyses;
+}
+
+class FlowAnalysis extends AnalysisResult {
+	ref FlowAnalysisMethod[+] analyses;
+}
+
+
+
+

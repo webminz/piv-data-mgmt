@@ -1,0 +1,233 @@
+/*!REQ: CorrLang.language.version == 1.0 */
+
+endpoint LIS {
+    type: FILESET
+    technology: CSV
+    at: "./data/lis/"
+    schemaAt: "./meta/lis/schema-extract.sql"
+    schemaTechnology: SQL
+}
+
+endpoint DOMAIN {
+    type: VIRTUAL
+    technology: EMF
+    schemaAt: "./meta/domain/domainmodel.ecore"
+}
+
+endpoint XES {
+    type: FILESET
+    technology: XML
+    at: "./data/xes"
+    schemaAt: "./meta/xes/xes-ieee-1849-2016.xsd"
+}
+
+endpoint MASTER_DATA {
+    type: FILESET
+    technology: CSV
+    at: "./data/masterdata/"
+    schemaAt: "./meta/masterdata/schema.sql"
+    schemaTechnology: SQL
+}
+
+endpoint PROCESS {
+    type: FILE
+    technology: DRAWIO_PTNETS_PLUGIN
+    at: "./data/process/patho-flow.drawio.xml"
+}
+
+endpoint MAPPING {
+    type: FILE
+    technology: EXCEL
+    at: "./data/EventMapping.xlsx"
+    schemaAt: "./meta/mappings.ecore"
+    schemaTechnology: EMF
+}
+
+correspondence Mapping (LIS, DOMAIN, XES, MASTER_DATA, PROCESS, MAPPING) {
+
+    /* Base types */
+    identify DOMAIN.Timestamp as $DATE_TIME$;
+    identify (DOMAIN.ID,DOMAIN.NorpatCode) as $STRING$;
+
+    identify (MAPPING.ActivityLifecylce, DOMAIN.EventType) with {
+        identify (MAPPING.ActivityLifecylce.START, DOMAIN.EventType.ACTIVITY_START);
+        identify (MAPPING.ActivityLifecylce.END, DOMAIN.EventType.ACTIVITY_END);
+    }
+
+    /* Metadata (Codings) mapping */
+    relate (LIS.OrderEvents, MAPPING.EventMapping) as mapping 
+        when [
+            (isempty?(MAPPING.EventMapping.SourceEventID) || LIS.OrderEvents.EventID == MAPPING.EventMapping.SourceEventID) 
+            &&
+            (isempty?(MAPPING.EventMapping.SourceEventCategory) || LIS.OrderEvents.EventCategory == MAPPING.EventMapping.SourceEventCategory) 
+            &&
+            (isempty?(MAPPING.EventMapping.InfoPattern) || regex((MAPPING.EventMapping.InfoPattern).matches?(LIS.OrderEvents.Info)))
+            &&
+            (isempty?(MAPPING.EventMapping.StatusPattern) || regex((MAPPING.EventMapping.StatusPattern).matches?(LIS.OrderEvents.Status)))
+            &&
+            (isempty?(MAPPING.EventMapping.MachinePattern) || regex((MAPPING.EventMapping.MachinePattern).matches?(LIS.OrderEvents.Machine)))
+        ];
+
+    relate (LIS.Orders, MASTER_DATA.LocationProcedurePairs) as coding
+        when [
+            LIS.Orders.PathoSampleTypeSec == MASTER_DATA.LocationProcedurePairs.LocationId
+            &&
+            LIS.Orders.PathoSampleTypeTert == MASTER_DATA.LocationProcedurePairs.ProcedureId
+        ];
+
+    /* Domain model mapping */
+    identify (LIS.Orders, DOMAIN.Case) with {
+        identify (LIS.Orders.CDOrderID, DOMAIN.Case.internalID);
+        identify (LIS.Orders.CDOrderIDTert, DOMAIN.Case.labID);
+        sync (LIS.Orders.CDPatient, DOMAIN.Case.patient) when [
+            LIS.Orders.CDPatient == DOMAIN.Case.patient.internalID
+        ];
+        /* TODO: Requisition data */
+        sync(foreach(LIS.Orders.NumberOfPathoSamples) ~~> DOMAIN.Case.specimens) with {
+            sync (LIS.Orders.coding.NorpatLocationCode ~~> DOMAIN.Case.specimens.locationCode);
+            sync (LIS.Orders.coding.NorpatProcedureCode ~~> DOMAIN.Case.specimens.procedureCode);
+            sync (LIS.Orders.SampleTypeDate ~~> DOMAIN.Case.specimens.samplingDate);
+        };
+
+    };
+
+    identify (LIS.OrderBlocksSlides, DOMAIN.Slide) with {
+        identify (LIS.OrderBlocksSlides.SlideID, DOMAIN.Slide.internalID);
+        identify (LIS.OrderBlocksSlides.SlideNo, DOMAIN.Slide.slideNo);
+        sync (LIS.OrderBlocksSlides.Stainining, DOMAIN.Slide.stain) when [
+            LIS.OrderBlocksSlides.Stainining == DOMAIN.Slide.stain.code;
+        ]
+        sync (LIS.OrderBlocksSlides.BlockID ~~> DOMAIN.Slide.block) with {
+            sync (LIS.OrderBlocksSlides.BlockID ~~> Domain.Slide.block.internalID);
+            sync (LIS.OrderBlocksSlides.BlockNo ~~> Domain.Slide.block.blockNo);
+        };
+    }
+
+    identify (LIS.OrderAnalyses, DOMAIN.AnalysisResult) with {
+        identify(datetime(LIS.OrderAnalyses.RequisitionDate, LIS.OrderAnalyses.RequisitionTime), DOMAIN.AnalysisResult.orderedAt);
+        /* TODO: Master data */
+    };
+
+
+    /* Event Mapping */
+    sync (LIS.OrderEvents ~~> DOMAIN.Event) 
+        when [ 
+            LIS.OrderEvents ~~ MAPPING.EventMapping                
+        ] with {
+            sync (LIS.OrderEvents.CDOrderID ~~> DOMAIN.Event.belongsTo)
+                when [LIS.OrderEvents.CDOrderID == DOMAIN.Event.belongsTo.internalID];
+            sync (datetime(LIS.OrderEvents.EventDate,LIS.OrderEvents.EventTime) ~~> DOMAIN.Event.timestamp); 
+            sync (getordefault(LIS.OrderEvents.mapping.TargetActivityLifecycle, "EVENT")  ~~> DOMAIN.Event.eventType);
+            sync (LIS.OrderEvents.mapping.TargetEventName ~~> DOMAIN.Event.name);
+            sync (LIS.OrderEvents.User ~~> DOMAIN.Event.responsible) 
+                when [LIS.OrderEvents.User == DOMAIN.Event.responsible.userID];
+            sync (LIS.OrderEvents.CDSampleID ~~> DOMAIN.Event.actsUpon)
+                when [LIS.OrderEvents.CDSampleID == DOMAIN.Event.actsUpon.internalID];
+            sync (concat(LIS.OrderEvents.Info, LIS.OrderEvents.Status, LIS.OrderEvents.Machine) ~~> DOMAIN.Event.metadata); 
+            sync (LIS.OrderEvents.Workstation ~~> DOMAIN.Event.workstation);
+        };
+
+    /* Special treatment for Grossing, Accessioning, Microcopic Analysis */
+    sync (LIS.AccessLog, LIS.OrderEvents ~~> DOMAIN.Event)
+        when [
+            LIS.OrderEvents.mapping.TargetEventName == "acessioning"
+            && 
+            LIS.OrderEvents.CDOrderID = LIS.AccessLog.CDOrderID
+            &&
+            LIS.OrderEvents.User == LIS.AccessLog.UserName
+            &&
+            LIS.AccessLog.AccessLog == "PAT_BIOING"
+            &&
+            datetime(LIS.AccessLog.EventDate,LIS.AccessLog.EventTime).before?(datetime(LIS.OrderEvents.EventDate, LIS.OrderEvents.EventTime))
+        ] with {
+            sync (datetime(LIS.AccessLog.EventDate, LIS.AccessLog.EventTime) ~~> DOMAIN.Event.timestamp);
+            sync ("acessioning"  ~~> DOMAIN.Event.name);
+            sync ("ACTIVITY_START" ~~> DOMAIN.Event.eventType);
+            sync (LIS.AccessLog.UserName ~~>  DOMAIN.Event.responsible) 
+                when [LIS.AccessLog.UserName == DOMAIN.Event.responsible.userID];
+            sync (LIS.AccessLog.CDOrderID ~~> DOMAIN.Event.belongsTo)
+                when [LIS.AccessLog.CDOrderID == DOMAIN.Event.belongsTo.internalID];
+        };
+    
+    sync (LIS.AccessLog, LIS.OrderEvents ~~> DOMAIN.Event)
+        when [
+            LIS.OrderEvents.mapping.TargetEventName == "grossing"
+            && 
+            LIS.OrderEvents.CDOrderID = LIS.AccessLog.CDOrderID
+            &&
+            LIS.OrderEvents.User == LIS.AccessLog.UserName
+            &&
+            LIS.AccessLog.AccessLog == "PAT_BIOING"
+            &&
+            datetime(LIS.AccessLog.EventDate,LIS.AccessLog.EventTime).before?(datetime(LIS.OrderEvents.EventDate, LIS.OrderEvents.EventTime))
+        ] with {
+            sync (datetime(LIS.AccessLog.EventDate, LIS.AccessLog.EventTime) ~~> DOMAIN.Event.timestamp);
+            sync ("grossing"  ~~> DOMAIN.Event.name);
+            sync ("ACTIVITY_START" ~~> DOMAIN.Event.eventType);
+            sync (LIS.AccessLog.UserName ~~>  DOMAIN.Event.responsible) 
+                when [LIS.AccessLog.UserName == DOMAIN.Event.responsible.userID];
+            sync (LIS.AccessLog.CDOrderID ~~> DOMAIN.Event.belongsTo)
+                when [LIS.AccessLog.CDOrderID == DOMAIN.Event.belongsTo.internalID];
+        };
+
+     sync (LIS.AccessLog, LIS.OrderEvents ~~> DOMAIN.Event)
+        when [
+            LIS.OrderEvents.mapping.TargetEventName == "microscopicAnalysis"
+            && 
+            LIS.OrderEvents.CDOrderID = LIS.AccessLog.CDOrderID
+            &&
+            LIS.OrderEvents.User == LIS.AccessLog.UserName
+            &&
+            LIS.AccessLog.AccessLog == "PAT_LEGE"
+            &&
+            datetime(LIS.AccessLog.EventDate,LIS.AccessLog.EventTime).before?(datetime(LIS.OrderEvents.EventDate, LIS.OrderEvents.EventTime))
+        ] with {
+            sync (datetime(LIS.AccessLog.EventDate, LIS.AccessLog.EventTime) ~~> DOMAIN.Event.timestamp);
+            sync ("microscopicAnalysis"  ~~> DOMAIN.Event.name);
+            sync ("ACTIVITY_START" ~~> DOMAIN.Event.eventType);
+            sync (LIS.AccessLog.UserName ~~>  DOMAIN.Event.responsible) 
+                when [LIS.AccessLog.UserName == DOMAIN.Event.responsible.userID];
+            sync (LIS.AccessLog.CDOrderID ~~> DOMAIN.Event.belongsTo)
+                when [LIS.AccessLog.CDOrderID == DOMAIN.Event.belongsTo.internalID];
+        };
+
+    /* TODO: inference based on machine programs */
+    /* TODO: events based on domain model properties (ordered analyses) */
+
+
+    /* Aligning the domain model with XES */
+    identify (DOMAIN.Case, XES.TraceType) with {
+        sync (DOMAIN.Case  ~~> XES.TraceType.string) with {
+            sync ("concept:name"  ~~> XES.TraceType.string.key);
+            sync (DOMAIN.Case.CDOrderID  ~~> XES.TraceType.string.value);
+        };
+    }
+
+    identify (DOMAIN.Event, XES.EventType) with {
+        sync (DOMAIN.Event.timestamp  ~~> XES.EventType.date) with {
+            sync ("time:timestamp"  ~~> XES.EventType.date.key);
+            sync (DOMAIN.Event.timestamp  ~~> XES.EventType.date.value);
+        };
+        sync (DOMAIN.Event.responsible  ~~> XES.EventType.string) with {
+            sync ("org:resource"  ~~> XES.EventType.string.key);
+            sync (DOMAIN.Event.responsible  ~~> XES.EventType.string.value);
+        };
+        sync (DOMAIN.Event.name ~~> XES.EventType.string) {
+            sync ("concept:name"  ~~> XES.EventType.string.key);
+            sync (DOMAIN.Event.name  ~~> XES.EventType.string.value);
+        };
+        sync (DOMAIN.Event.eventType ~~> XES.EventType.string) {
+            sync ("lifecycle:transition"  ~~> XES.EventType.string.key);
+            sync ("complete" ~~> XES.EventType.string.value) when [
+                DOMAIN.Event.eventType == "EVENT" || DOMAIN.Event.eventType == "ACTIVITY_END"
+            ];
+            sync ("started" ~~>  XES.EventType.string.value) when [
+               DOMAIN.Event.eventType == "ACTIVITY_START"
+            ];
+        };
+    };
+
+    identify (DOMAIN.Event.belongsTo, XES.TraceType.event);
+
+
+}

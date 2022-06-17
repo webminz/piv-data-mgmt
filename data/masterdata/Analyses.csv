@@ -1,0 +1,5 @@
+"ID";"CHAnalysisID";"Code";"Name";"ShortName";"OfferedByLab"
+1;"1234";CYTOL;Cytologi;Cytologi;CYTO_LAB
+2;"2345";MAKRO;Makrobeskrivelse;Makrobeskrivelse;1;2;0;HISTO_LAB
+3;"3456";HISTOBLOCK;Histologie blokk;Histologie blokk;HISTO_LAB
+4;"4567";HE;HE-farge;HE;HISTO_LAB

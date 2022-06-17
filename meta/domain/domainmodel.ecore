@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="histopathology" nsURI="http://www.helse-bergen.no/piv/data/histo-domain-model"
+    nsPrefix="histo">
+  <eClassifiers xsi:type="ecore:EDataType" name="ID" instanceClassName="java.lang.String"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="Timestamp" instanceClassName="java.time.LocalDateTime"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="NorpatCode" instanceClassName="java.lang.String"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="TokenType">
+    <eLiterals name="CASE"/>
+    <eLiterals name="ANALYSIS" value="1"/>
+    <eLiterals name="SPECIMEN" value="2"/>
+    <eLiterals name="BLOCK" value="3"/>
+    <eLiterals name="SLIDE" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PathologyField">
+    <eLiterals name="CYTOLOGY"/>
+    <eLiterals name="HISTOLOGY" value="1"/>
+    <eLiterals name="AUTOPSY" value="2"/>
+    <eLiterals name="MOLECULAR_PATHOLOGY" value="3"/>
+    <eLiterals name="FORENSIC_MEDICINE" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="UserRole">
+    <eLiterals name="SECRETARIAN"/>
+    <eLiterals name="LAB_TECHNICIAN" value="1"/>
+    <eLiterals name="PATHOLOGIST" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PathologySpecialization">
+    <eLiterals name="GYN"/>
+    <eLiterals name="HUD" value="1"/>
+    <eLiterals name="GI" value="2"/>
+    <eLiterals name="H" value="3"/>
+    <eLiterals name="SAR" value="4"/>
+    <eLiterals name="MAM" value="5"/>
+    <eLiterals name="NEV" value="6"/>
+    <eLiterals name="LYM" value="7"/>
+    <eLiterals name="ORA" value="8"/>
+    <eLiterals name="URO" value="9"/>
+    <eLiterals name="ØNH" value="10"/>
+    <eLiterals name="LUN" value="11"/>
+    <eLiterals name="ØYE" value="12"/>
+    <eLiterals name="HJE" value="13"/>
+    <eLiterals name="PLA" value="14"/>
+    <eLiterals name="ANN" value="15"/>
+    <eLiterals name="XXX" value="16"/>
+    <eLiterals name="NYR" value="17"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="InternalSpecimenSizeType">
+    <eLiterals name="BIG"/>
+    <eLiterals name="EXTENDED" value="1"/>
+    <eLiterals name="SMALL" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="InternalPriorityLevel">
+    <eLiterals name="CRYO"/>
+    <eLiterals name="CITO" value="1"/>
+    <eLiterals name="PRIO" value="2"/>
+    <eLiterals name="REGULAR" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SpecimenState">
+    <eLiterals name="FRESH"/>
+    <eLiterals name="FIXATED" value="1"/>
+    <eLiterals name="ARCHIVED" value="2"/>
+    <eLiterals name="DESTROYED" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="BlockState">
+    <eLiterals name="CASETTE"/>
+    <eLiterals name="PROCESSED" value="1"/>
+    <eLiterals name="EMBEDDED" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="CaseState">
+    <eLiterals name="NOTIFIED"/>
+    <eLiterals name="IN_LAB" value="1"/>
+    <eLiterals name="UNDER_DIAGNOSIS" value="2"/>
+    <eLiterals name="CONCLUDED" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="AnalysisState">
+    <eLiterals name="REQUISITIONED"/>
+    <eLiterals name="PRELIMINARY" value="1"/>
+    <eLiterals name="FINAL" value="2"/>
+    <eLiterals name="FINAL_AUGMENTED" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="EventType">
+    <eLiterals name="EVENT"/>
+    <eLiterals name="ACTIVITY_START" value="1"/>
+    <eLiterals name="ACTIVITY_END" value="2"/>
+    <eLiterals name="ACTIVITY_PAUSE" value="3"/>
+    <eLiterals name="UNOBSERVABLE_EVENT" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="BioSex">
+    <eLiterals name="MALE"/>
+    <eLiterals name="FEMALE" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="InternalLabDivision">
+    <eLiterals name="HISTO_LAB"/>
+    <eLiterals name="CYTO_LAB" value="1"/>
+    <eLiterals name="IMMUN_LAB" value="2"/>
+    <eLiterals name="KIDNEY_LAB" value="3"/>
+    <eLiterals name="NEURO_LAB" value="4"/>
+    <eLiterals name="MOLECULAR_LAB" value="5"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Event">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="belongsTo" lowerBound="1"
+        eType="#//Case"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" lowerBound="1"
+        eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="eventType" lowerBound="1"
+        eType="#//EventType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="actsUpon" eType="#//Token"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="responsible" eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="metadata" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="User">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="userID" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pseudonym" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="roles" upperBound="-1"
+        eType="#//UserRole"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Patient">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="internalId" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="personalIdentificationNo"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="familyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="givenNames" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="birthdate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="sex" eType="#//BioSex"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="HealthOrganizaton">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="internalId" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="code" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="address" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="partOf" eType="#//HealthOrganizaton"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Clinician">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="internalId" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="worksAt" lowerBound="1"
+        upperBound="-1" eType="#//HealthOrganizaton"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Requisition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalReference" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="requisitioner" lowerBound="1"
+        eType="#//Clinician"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="requestingOrganisation"
+        lowerBound="1" eType="#//HealthOrganizaton"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="issuedAt" lowerBound="1"
+        eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="isElectronic" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="isInternal" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="clinicalQuestions" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Token" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="internalID" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="tokenType" lowerBound="1"
+        eType="#//TokenType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Case" eSuperTypes="#//Token">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="labID" lowerBound="1" eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="division" lowerBound="1"
+        eType="#//PathologyField"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" lowerBound="1" eType="#//CaseState"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="priority" eType="#//InternalPriorityLevel"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="responsibleTeam" eType="#//PathologySpecialization"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="patient" lowerBound="1"
+        eType="#//Patient"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="responsiblePathologist"
+        eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="supervisingPathologists"
+        upperBound="-1" eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="requisition" lowerBound="1"
+        eType="#//Requisition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="specimens" lowerBound="1"
+        upperBound="-1" eType="#//Specimen" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Specimen" eSuperTypes="#//Token">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="samplingDate" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" lowerBound="1" eType="#//SpecimenState"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="size" lowerBound="1" eType="#//InternalSpecimenSizeType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="locationCode" lowerBound="1"
+        eType="#//NorpatCode"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="procedureCode" lowerBound="1"
+        eType="#//NorpatCode"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="archiveContainer" eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="blocks" upperBound="-1"
+        eType="#//Block" containment="true" eOpposite="#//Block/specimen"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Block" eSuperTypes="#//Token">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="blockNo" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" lowerBound="1" eType="#//BlockState"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="createdAt" lowerBound="1"
+        eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="slides" upperBound="-1"
+        eType="#//Slide" containment="true" eOpposite="#//Slide/block"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="specimen" lowerBound="1"
+        eType="#//Specimen" eOpposite="#//Specimen/blocks"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Slide" eSuperTypes="#//Token">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="slideNo" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="block" lowerBound="1" eType="#//Block"
+        eOpposite="#//Block/slides"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orderedAt" lowerBound="1"
+        eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orderedBy" lowerBound="1"
+        eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="createdAt" eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stainedAt" eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="stain" eType="#//StainingMethod"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AnalysisMethod" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="internalID" lowerBound="1"
+        eType="#//ID"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="code" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="offeredByLab" lowerBound="1"
+        eType="#//InternalLabDivision"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StainingMethod" eSuperTypes="#//AnalysisMethod"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FlowAnalysisMethod" eSuperTypes="#//AnalysisMethod"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MolecularAnalysisMethod" eSuperTypes="#//AnalysisMethod"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AnalysisResult" abstract="true" eSuperTypes="#//Token">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" lowerBound="1" eType="#//AnalysisState"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="comment" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orderedAt" lowerBound="1"
+        eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orderedBy" lowerBound="1"
+        eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="issuedAt" eType="#//Timestamp"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="issuedBy" eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastUpdated" eType="#//Timestamp"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MicroscopicAnalysis" eSuperTypes="#//AnalysisResult">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="diagnosisCoding" upperBound="-1"
+        eType="#//NorpatCode"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MacroscopicAnalysis" eSuperTypes="#//AnalysisResult"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MolecularAnalysis" eSuperTypes="#//AnalysisResult">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="analyses" lowerBound="1"
+        upperBound="-1" eType="#//MolecularAnalysisMethod"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FlowAnalysis" eSuperTypes="#//AnalysisResult">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="analyses" lowerBound="1"
+        upperBound="-1" eType="#//FlowAnalysisMethod"/>
+  </eClassifiers>
+</ecore:EPackage>

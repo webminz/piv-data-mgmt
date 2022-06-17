@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mappings" nsURI="http://www.helse-bergen.no/piv/data/event-mappings"
+    nsPrefix="mappings">
+  <eClassifiers xsi:type="ecore:EEnum" name="ActivityLifecylce">
+    <eLiterals name="START"/>
+    <eLiterals name="END" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EventMapping">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="TargetEventName" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="TargetActivityLifecycle"
+        eType="#//ActivityLifecylce"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="SourceEventID" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="SourceEventCategory" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="InfoPattern" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="StatusPattern" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="MachinePattern" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+</ecore:EPackage>

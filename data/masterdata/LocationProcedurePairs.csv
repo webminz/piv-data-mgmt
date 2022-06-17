@@ -1,0 +1,4 @@
+"LocationId";"ProcedureId";"LocationDesc";"ProcedureDesc";"DefaultOrganGroup";"NorpatLocationCode";"NorpatLocationCode";"DefaultNoOfBlocks"
+"1";"1";Hud;Stansebiopsi inflammasjon;HUD;T01000;P11480;1
+"1";"2";Hud;Avskrap;H;T02000;P11470;1
+"2";"3";Pharynx;Nålebiopsi;ØNH;T60000;P11430l;15

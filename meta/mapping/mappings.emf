@@ -1,0 +1,19 @@
+@namespace(
+	uri="http://www.helse-bergen.no/piv/data/event-mappings",
+	prefix="mappings")
+package mappings;
+
+enum ActivityLifecylce {
+	START;
+	END;
+}
+
+class EventMapping {
+	attr String[1] TargetEventName;
+	attr ActivityLifecylce[?] TargetActivityLifecycle;
+	attr String[?] SourceEventID;
+	attr String[?] SourceEventCategory;
+	attr String[?] InfoPattern;
+	attr String[?] StatusPattern;
+	attr String[?] MachinePattern;
+}
